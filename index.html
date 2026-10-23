@@ -227,9 +227,41 @@
   .intro-links .btn { text-decoration: none; }
   .site-foot { margin: 28px 4px 8px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; text-align: center; }
   .site-foot a { color: var(--accent); text-underline-offset: 3px; }
+
+  /* ---- home: two-column on desktop, like closedroom.site ---- */
+  .home { display: flex; flex-direction: column; }
+  .home-left { display: contents; }
+  .home .intro { order: 1; }
+  .home .home-right { order: 2; }
+  .home .facts { order: 3; }
+  .home-form { display: flex; flex-direction: column; gap: 14px; }
+  .hint { margin: 8px 0 0; color: var(--muted); font-size: .84rem; line-height: 1.4; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tools .btn { min-height: 40px; }
+  .note-box {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--bg); color: var(--muted); font-size: .82rem; line-height: 1.45;
+  }
+  .note-box svg { flex: none; color: var(--accent); margin-top: 2px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .actions .btn { min-height: 52px; padding: 0 12px; }
+  .home-form .field-error { margin: 0; }
+  body.on-home .site-foot { display: none; }
+  @media (min-width: 900px) {
+    body.on-home { padding: 0; }
+    body.on-home .shell { max-width: none; margin: 0; }
+    .home { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; min-height: 100dvh; }
+    .home-left { display: flex; flex-direction: column; justify-content: flex-end; padding: 56px max(32px, 5vw) 48px; }
+    .home .intro, .home .facts { order: initial; }
+    .home .intro { padding: 0; }
+    .home .facts { padding: 28px 0 0; max-width: 46ch; }
+    .home-right { display: flex; align-items: center; justify-content: center; padding: 48px 32px; background: #0e110e; border-left: 1px solid var(--border); }
+    .home-form.card { width: 100%; max-width: 420px; background: transparent; border: 0; padding: 0; }
+  }
 </style>
 </head>
-<body>
+<body class="on-home">
 <main class="shell">
   <div class="brand" id="brand" hidden>
     <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#121512" stroke="#1f261f"/><path d="M9 16h14M17 10l6 6-6 6" fill="none" stroke="#4fc178" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -239,42 +271,56 @@
   <noscript><div class="card">Direct share needs JavaScript and WebRTC to transfer files.</div></noscript>
 
   <!-- HOME -->
-  <section id="view-home">
-    <section class="intro">
-      <p class="kicker">Peer to peer</p>
-      <h1 class="display">Direct<br>share</h1>
-      <p class="dek">Browser-to-browser file transfer. Files go straight between two browsers. Nothing is uploaded or stored, no account needed.</p>
-      <div class="row intro-links">
-        <a class="btn btn-ghost btn-sm" href="how-it-works.html">How it works</a>
-        <a class="btn btn-ghost btn-sm" href="https://github.com/lianshao09/Directshare" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-          GitHub
-        </a>
-      </div>
-    </section>
-    <div class="grid">
-      <div class="card option">
-        <h2>Create a channel</h2>
-        <p class="muted">Get a one-time ID and share it with the person you want to send files to.</p>
-        <button id="btn-create" class="btn btn-primary btn-block push" type="button">Create a channel</button>
-      </div>
-      <form id="join-form" class="card option" autocomplete="off" novalidate>
-        <h2>Join a channel</h2>
-        <p class="muted">Got an ID from someone? Enter it here.</p>
-        <label for="join-id">Room ID</label>
-        <input id="join-id" class="input" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX" aria-describedby="join-error">
-        <p id="join-error" class="field-error" role="alert"></p>
-        <div class="push" style="padding-top:14px">
-          <button id="btn-join" class="btn btn-primary btn-block" type="submit" disabled>Join channel</button>
+  <section id="view-home" class="home">
+    <div class="home-left">
+      <section class="intro">
+        <p class="kicker">Peer to peer</p>
+        <h1 class="display">Direct<br>share</h1>
+        <p class="dek">Browser-to-browser file transfer. Files go straight between two browsers. Nothing is uploaded or stored, no account needed.</p>
+        <div class="row intro-links">
+          <a class="btn btn-ghost btn-sm" href="how-it-works.html">How it works</a>
+          <a class="btn btn-ghost btn-sm" href="https://github.com/lianshao09/Directshare" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
         </div>
+      </section>
+      <ul class="facts">
+        <li>Public relays only introduce the two browsers, and they never see the ID. Files never pass through them and are never stored.</li>
+        <li>The connection is WebRTC, without TURN. On a very restrictive network the other person may not be able to connect.</li>
+        <li>Nothing remains after you leave or close the tab. A channel also closes itself after 60 minutes.</li>
+      </ul>
+    </div>
+
+    <div class="home-right">
+      <form id="join-form" class="card home-form" autocomplete="off" novalidate>
+        <div>
+          <label for="join-id">Room ID</label>
+          <input id="join-id" class="input" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX" aria-describedby="join-hint join-error">
+          <p id="join-hint" class="hint">Create a channel with a new ID and share it, or enter the ID you received to join.</p>
+        </div>
+        <div class="tools">
+          <button id="btn-gen" type="button" class="btn btn-ghost btn-sm">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/></svg>
+            <span class="lbl">Generate random ID</span>
+          </button>
+          <button id="btn-invite" type="button" class="btn btn-ghost btn-sm">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>
+            <span class="lbl">Copy invite link</span>
+          </button>
+        </div>
+        <p id="join-error" class="field-error" role="alert"></p>
+        <div class="note-box">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+          <span>Direct peer-to-peer connection. Your IP address is visible to the other person. Use a VPN if you wish to remain fully anonymous.</span>
+        </div>
+        <div class="actions">
+          <button id="btn-create" class="btn btn-primary" type="button">Create channel</button>
+          <button id="btn-join" class="btn btn-ghost" type="submit" disabled>Join channel</button>
+        </div>
+        <p id="home-error" class="field-error" role="alert"></p>
       </form>
     </div>
-    <p id="home-error" class="field-error" role="alert" style="margin-top:16px"></p>
-    <ul class="facts">
-      <li>Public relays only introduce the two browsers, and they never see the ID. Files never pass through them and are never stored.</li>
-      <li>The connection is WebRTC, without TURN. On a very restrictive network the other person may not be able to connect.</li>
-      <li>Nothing remains after you leave or close the tab. A channel also closes itself after 60 minutes.</li>
-    </ul>
   </section>
 
   <!-- WAITING (creator) -->
@@ -283,7 +329,7 @@
     <div class="room-id" id="room-id-display" aria-label="Room ID">----</div>
     <div class="row center-row" style="margin-bottom:20px">
       <button id="btn-copy-id" class="btn btn-primary" type="button">Copy ID</button>
-      <button id="btn-copy-link" class="btn btn-ghost" type="button">Copy link</button>
+      <button id="btn-copy-link" class="btn btn-ghost" type="button">Copy invite link</button>
     </div>
     <div class="waiting" role="status">
       <span class="spinner" aria-hidden="true"></span>
@@ -370,6 +416,7 @@
   const PING_MS = 5000;                      // liveness ping to the other user
   const WATCHDOG_MS = 25000;                 // no message for this long = other user gone
   const HELLO_RETRY_MS = 3000;
+  const PENDING_MS = 10000;                  // host forgets a joiner that never confirms
   const BLOCK = 256 * 1024;                  // read size from disk (Trystero chunks it to ~16 KiB)
   const MAX_FILE_SIZE = 1024 * 1024 * 1024;  // received files are held in memory
   const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 symbols: no 0/O/1/I
@@ -384,6 +431,7 @@
       role: null, code: null, partner: null,
       connected: false, closed: false,
       peerIds: new Set(), peersSeen: 0, lastSeen: 0, deadline: 0,
+      pending: null, cand: null, candExpires: 0,   // handshake: host's joiner / joiner's host
       findTimer: null, helloTimer: null, pingTimer: null, watchTimer: null, clockTimer: null, expireTimer: null,
       queue: [], pumping: false,
       incoming: null,
@@ -397,6 +445,7 @@
   function show(name) {
     for (const v of VIEWS) $('view-' + v).hidden = v !== name;
     $('brand').hidden = name === 'home';
+    document.body.classList.toggle('on-home', name === 'home');
     const h = $('view-' + name).querySelector('h2');
     if (h) h.focus({ preventScroll: true });
     window.scrollTo({ top: 0 });
@@ -528,6 +577,8 @@
   function setBusy(busy) {
     $('btn-create').disabled = busy;
     $('btn-join').disabled = busy || $('join-id').value.length !== 9;
+    $('btn-gen').disabled = busy;
+    $('btn-invite').disabled = busy;
     $('join-id').disabled = busy;
   }
 
@@ -579,6 +630,8 @@
     room.onPeerLeave((id) => {
       if (sess !== S || sess.closed) return;
       sess.peerIds.delete(id);
+      if (sess.pending && sess.pending.id === id) sess.pending = null;
+      if (sess.cand === id) sess.cand = null;
       if (id === sess.partner) closeChannel('peer-left');
     });
 
@@ -633,34 +686,55 @@
     show('channel');
   }
 
+  // Handshake: hello -> accept -> ready -> go. Both sides only show "connected" after a full round
+  // trip over the same connection, and every step is safe to repeat. This matters because two
+  // simultaneous WebRTC connections can form and one of them is dropped a moment later, which can
+  // swallow a single message (or briefly look like the other user left).
   function onControl(sess, msg, id) {
     if (!msg || typeof msg !== 'object') return;
 
-    // A third person: tell them the channel is taken, ignore everything else from them.
-    if (sess.partner && id !== sess.partner) {
+    if (!sess.partner) {
+      if (sess.role === 'create') {
+        if (sess.pending && Date.now() - sess.pending.at > PENDING_MS) sess.pending = null;
+        if (msg.t === 'hello') {
+          if (!sess.pending) sess.pending = { id, at: Date.now() };
+          if (sess.pending.id === id) {
+            sendCtl(sess, { t: 'accept', expiresIn: Math.max(0, sess.deadline - Date.now()) }, id);
+          }
+        } else if (msg.t === 'ready') {
+          if (!sess.pending || sess.pending.id === id) {
+            sess.pending = null;
+            sendCtl(sess, { t: 'go' }, id);
+            onConnected(sess, id);
+          }
+        }
+      } else if (msg.t === 'accept') {
+        sess.cand = id;
+        sess.candExpires = Number(msg.expiresIn) || 0;
+        sendCtl(sess, { t: 'ready' }, id);
+      } else if (msg.t === 'go' && sess.cand === id) {
+        startClock(sess, sess.candExpires);
+        onConnected(sess, id);
+      } else if (msg.t === 'full') {
+        goHome('join-error', 'That channel already has two users.');
+      }
+      return;
+    }
+
+    // connected
+    if (id !== sess.partner) {
+      // a third person: tell them the channel is taken, ignore everything else from them
       if (msg.t === 'hello' && sess.role === 'create') sendCtl(sess, { t: 'full' }, id);
       return;
     }
 
-    if (id === sess.partner) sess.lastSeen = Date.now();
+    sess.lastSeen = Date.now();
 
     switch (msg.t) {
       case 'hello':
-        if (sess.role !== 'create' || sess.partner) return;
-        sendCtl(sess, { t: 'accept', expiresIn: Math.max(0, sess.deadline - Date.now()) }, id);
-        onConnected(sess, id);
+      case 'ready':
+        if (sess.role === 'create') sendCtl(sess, { t: 'go' }, id); // their 'go' was lost
         break;
-
-      case 'accept':
-        if (sess.role !== 'join' || sess.partner) return;
-        startClock(sess, msg.expiresIn);
-        onConnected(sess, id);
-        break;
-
-      case 'full':
-        if (sess.role === 'join' && !sess.partner) goHome('join-error', 'That channel already has two users.');
-        break;
-
       case 'meta':   receiveMeta(sess, msg); break;
       case 'end':    receiveEnd(sess, msg); break;
       case 'abort':  receiveAbort(sess, msg); break;
@@ -868,7 +942,6 @@
   }
 
   /* --------------------------------- wiring ------------------------------ */
-  $('btn-create').addEventListener('click', () => enterRoom('create', genCode()));
 
   const joinInput = $('join-id');
   joinInput.addEventListener('input', () => {
@@ -885,14 +958,57 @@
     enterRoom('join', code);
   });
 
+  function setPrimary(which) {
+    const c = $('btn-create'), j = $('btn-join');
+    c.classList.toggle('btn-primary', which === 'create');
+    c.classList.toggle('btn-ghost', which !== 'create');
+    j.classList.toggle('btn-primary', which === 'join');
+    j.classList.toggle('btn-ghost', which !== 'join');
+  }
+
+  function flashLabel(btn, label) {
+    const span = btn.querySelector('.lbl');
+    if (!span) return;
+    span.dataset.label = span.dataset.label || span.textContent;
+    span.textContent = label;
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { span.textContent = span.dataset.label; }, 1600);
+  }
+
+  function putCode(code) {
+    joinInput.value = code;
+    joinInput.dispatchEvent(new Event('input'));
+  }
+
+  // Create: use the ID in the box if it is valid, otherwise make a fresh one.
+  $('btn-create').addEventListener('click', () => {
+    enterRoom('create', normalizeCode(joinInput.value) || genCode());
+  });
+
+  $('btn-gen').addEventListener('click', (e) => {
+    putCode(genCode());
+    setPrimary('create');
+    flashLabel(e.currentTarget, 'New ID \u2713');
+  });
+
+  $('btn-invite').addEventListener('click', async (e) => {
+    const btn = e.currentTarget; // currentTarget is null after an await
+    let code = normalizeCode(joinInput.value);
+    if (!code) { code = genCode(); putCode(code); setPrimary('create'); }
+    const ok = await copyText(location.origin + location.pathname + '#' + code);
+    flashLabel(btn, ok ? 'Link copied \u2713' : 'Copy failed');
+  });
+
   $('btn-copy-id').addEventListener('click', async (e) => {
+    const btn = e.currentTarget; // currentTarget is null after an await
     const ok = await copyText(S.code || '');
-    flashButton(e.currentTarget, ok ? 'Copied ✓' : 'Press Ctrl+C');
+    flashButton(btn, ok ? 'Copied ✓' : 'Press Ctrl+C');
   });
   $('btn-copy-link').addEventListener('click', async (e) => {
+    const btn = e.currentTarget; // currentTarget is null after an await
     const link = location.origin + location.pathname + '#' + (S.code || '');
     const ok = await copyText(link);
-    flashButton(e.currentTarget, ok ? 'Link copied ✓' : 'Copy failed');
+    flashButton(btn, ok ? 'Link copied ✓' : 'Copy failed');
   });
 
   $('btn-cancel-wait').addEventListener('click', () => goHome());
@@ -953,6 +1069,7 @@
     if (code) {
       joinInput.value = code;
       $('btn-join').disabled = false;
+      setPrimary('join');
     }
   })();
 
