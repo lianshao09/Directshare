@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0d0b">
+<meta name="referrer" content="no-referrer">
+<link rel="canonical" href="https://directshare.site/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://directshare.site/">
+<meta property="og:title" content="Direct share">
+<meta property="og:description" content="Send files straight from one browser to another. No uploads, no accounts, nothing stored.">
+<meta name="twitter:card" content="summary">
+<title>Direct share – peer-to-peer file transfer</title>
+<meta name="description" content="Send files straight from one browser to another. No uploads, no accounts, nothing stored.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0d0b'/%3E%3Cpath d='M9 16h14M17 10l6 6-6 6' fill='none' stroke='%234fc178' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0b0d0b;
+    --card: #121512;
+    --text: #e4e8e1;
+    --muted: #8d968a;
+    --border: #1f261f;
+    --accent: #4fc178;
+    --accent-hover: #63cd88;
+    --on-accent: #07140b;
+    --accent-soft: #16261c;
+    --ok: #4fc178;
+    --ok-soft: #1b3324;
+    --danger: #f08a84;
+    --danger-soft: #2a1717;
+    --track: #1f261f;
+    --shadow: none;
+    --radius: 20px;
+    --serif: Georgia, "Times New Roman", "DejaVu Serif", serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  [hidden] { display: none !important; }
+
+  .shell { max-width: 720px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 8px 4px 20px; font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; }
+  .brand svg { width: 30px; height: 30px; flex: none; }
+  .tagline { margin: 0 0 24px; padding: 0 4px; color: var(--muted); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+  .card + .card { margin-top: 16px; }
+  h1, h2, h3 { margin: 0 0 8px; line-height: 1.25; letter-spacing: -.01em; }
+  h2 { font-size: 1.3rem; }
+  h2:focus { outline: none; }
+  h3 { font-size: 1rem; }
+  p { margin: 0 0 16px; }
+  .muted { color: var(--muted); }
+  .small { font-size: .875rem; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .grid .card + .card { margin-top: 0; }
+  .option { display: flex; flex-direction: column; }
+  .option .push { margin-top: auto; }
+
+  /* Buttons */
+  .btn {
+    appearance: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; padding: 0 20px;
+    border-radius: 12px; border: 1px solid transparent;
+    font: inherit; font-weight: 600; cursor: pointer;
+    text-decoration: none;
+    transition: background .15s, border-color .15s, transform .05s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+  .btn-danger:hover:not(:disabled) { background: var(--danger-soft); }
+  .btn-block { width: 100%; }
+  .btn-sm { min-height: 36px; padding: 0 14px; font-size: .875rem; border-radius: 10px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* Inputs */
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: .9rem; }
+  .input {
+    width: 100%; min-height: 48px; padding: 0 14px;
+    border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text);
+    font: 600 1.25rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: .12em; text-transform: uppercase; text-align: center;
+  }
+  .input::placeholder { color: var(--muted); opacity: .7; font-weight: 500; }
+  .input:focus { outline: 3px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+  .field-error { margin: 10px 0 0; color: var(--danger); font-size: .9rem; min-height: 0; }
+  .field-error:empty { display: none; }
+  .stack > * + * { margin-top: 12px; }
+
+  /* Waiting / connecting */
+  .center { text-align: center; }
+  .room-id {
+    display: inline-block; margin: 8px 0 16px; padding: 14px 20px;
+    border: 1px dashed var(--accent); border-radius: 14px; background: var(--accent-soft);
+    font: 700 2rem/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: .14em; user-select: all; word-break: keep-all;
+  }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row.center-row { justify-content: center; }
+  .spinner {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 3px solid var(--track); border-top-color: var(--accent);
+    animation: spin .9s linear infinite; flex: none;
+  }
+  .waiting { display: inline-flex; align-items: center; gap: 10px; color: var(--muted); margin: 4px 0 20px; text-align: left; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } .btn { transition: none; } }
+
+  /* Channel */
+  .channel-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--ok-soft); color: var(--ok); font-weight: 600; font-size: .9rem;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+  .channel-meta { color: var(--muted); font-size: .85rem; margin: 6px 2px 0; }
+
+  .drop {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    padding: 32px 16px; text-align: center;
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    background: var(--bg); transition: border-color .15s, background .15s;
+  }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop svg { width: 36px; height: 36px; color: var(--accent); }
+  .drop strong { font-size: 1.05rem; }
+  .drop .or { color: var(--muted); font-size: .875rem; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .transfers-head { display: flex; align-items: baseline; justify-content: space-between; margin: 28px 0 10px; }
+  .transfers-head h3 { margin: 0; }
+  .empty { color: var(--muted); border: 1px dashed var(--border); border-radius: 12px; padding: 18px; text-align: center; font-size: .95rem; }
+  .files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .file { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--card); }
+  .file-top { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    flex: none; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent);
+  }
+  .badge.recv { background: var(--ok-soft); color: var(--ok); }
+  .file-name { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; margin: 10px 0 6px; }
+  .bar-fill { height: 100%; width: 0; border-radius: 999px; background: var(--accent); transition: width .12s linear; }
+  .file.ok .bar-fill { background: var(--ok); }
+  .file.err .bar-fill { background: var(--danger); }
+  .file-meta { font-size: .85rem; color: var(--muted); }
+  .file.err .file-meta { color: var(--danger); }
+
+  .footer-note { margin: 20px 4px 0; color: var(--muted); font-size: .8rem; text-align: center; }
+
+  /* Closed */
+  .closed-icon { width: 44px; height: 44px; color: var(--danger); margin-bottom: 8px; }
+  .closed-icon.neutral { color: var(--muted); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: min(92vw, 460px); padding: 12px 18px; border-radius: 12px;
+    background: var(--text); color: var(--bg); font-size: .9rem; box-shadow: 0 8px 24px rgba(0,0,0,.25); z-index: 10;
+  }
+
+  @media (max-width: 520px) {
+    .card { padding: 18px; }
+    .room-id { font-size: 1.6rem; padding: 12px 14px; }
+    .drop { padding: 22px 12px; }
+    .drop .desktop-only { display: none; }
+    .channel-head .btn { width: 100%; }
+  }
+
+  /* ---- Closed room look: dark, serif display type, green accent ---- */
+  body { color-scheme: dark; }
+  ::selection { background: #2f6b45; color: #fff; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.1rem; }
+  .brand { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; padding: 4px 4px 16px; }
+  .kicker { margin: 0 0 12px; color: var(--accent); font-size: .75rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+  h1.display { margin: 0; font-size: clamp(2.5rem, 10vw, 4.6rem); line-height: .98; letter-spacing: -.03em; }
+  .dek { margin: 16px 0 0; max-width: 38ch; color: var(--muted); font-size: 1.02rem; }
+  .intro { padding: 20px 4px 24px; }
+  .card { padding: 18px; }
+  .btn { border-radius: 14px; }
+  .btn-sm { border-radius: 12px; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08); background: var(--accent); }
+  .btn-ghost:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .btn-danger { color: var(--text); border-color: var(--border); border-radius: 999px; }
+  .btn-danger:hover:not(:disabled) { color: var(--danger); border-color: var(--danger); background: transparent; }
+  .input { border-radius: 14px; }
+  .input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .room-id { background: var(--accent-soft); border-color: var(--accent); }
+  .drop { border-radius: 20px; }
+  .file { background: var(--bg); }
+  .badge { background: var(--ok-soft); color: #e6f4ea; }
+  .badge.recv { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+  .pill { background: var(--ok-soft); color: var(--accent); }
+  .toast { background: var(--text); color: var(--bg); }
+  .facts { list-style: none; margin: 8px 0 0; padding: 16px 4px 28px; display: grid; gap: 10px; }
+  .facts li { position: relative; padding-left: 16px; font-size: .92rem; line-height: 1.45; color: var(--muted); }
+  .facts li::before { content: ""; position: absolute; left: 0; top: .5em; width: 7px; height: 7px; background: var(--accent); }
+  .field-error { color: var(--accent); }
+  .intro-links { margin-top: 18px; gap: 10px; }
+  .intro-links .btn { text-decoration: none; }
+  .site-foot { margin: 28px 4px 8px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; text-align: center; }
+  .site-foot a { color: var(--accent); text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="brand" id="brand" hidden>
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#121512" stroke="#1f261f"/><path d="M9 16h14M17 10l6 6-6 6" fill="none" stroke="#4fc178" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Direct share
+  </div>
+
+  <noscript><div class="card">Direct share needs JavaScript and WebRTC to transfer files.</div></noscript>
+
+  <!-- HOME -->
+  <section id="view-home">
+    <section class="intro">
+      <p class="kicker">Peer to peer</p>
+      <h1 class="display">Direct<br>share</h1>
+      <p class="dek">Browser-to-browser file transfer. Files go straight between two browsers. Nothing is uploaded or stored, no account needed.</p>
+      <div class="row intro-links">
+        <a class="btn btn-ghost btn-sm" href="how-it-works.html">How it works</a>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/lianshao09/Directshare" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </section>
+    <div class="grid">
+      <div class="card option">
+        <h2>Create a channel</h2>
+        <p class="muted">Get a one-time ID and share it with the person you want to send files to.</p>
+        <button id="btn-create" class="btn btn-primary btn-block push" type="button">Create a channel</button>
+      </div>
+      <form id="join-form" class="card option" autocomplete="off" novalidate>
+        <h2>Join a channel</h2>
+        <p class="muted">Got an ID from someone? Enter it here.</p>
+        <label for="join-id">Room ID</label>
+        <input id="join-id" class="input" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX" aria-describedby="join-error">
+        <p id="join-error" class="field-error" role="alert"></p>
+        <div class="push" style="padding-top:14px">
+          <button id="btn-join" class="btn btn-primary btn-block" type="submit" disabled>Join channel</button>
+        </div>
+      </form>
+    </div>
+    <p id="home-error" class="field-error" role="alert" style="margin-top:16px"></p>
+    <ul class="facts">
+      <li>Public relays only introduce the two browsers, and they never see the ID. Files never pass through them and are never stored.</li>
+      <li>The connection is WebRTC, without TURN. On a very restrictive network the other person may not be able to connect.</li>
+      <li>Nothing remains after you leave or close the tab. A channel also closes itself after 60 minutes.</li>
+    </ul>
+  </section>
+
+  <!-- WAITING (creator) -->
+  <section id="view-waiting" class="card center" hidden>
+    <h2 tabindex="-1">Your channel is ready</h2>
+    <div class="room-id" id="room-id-display" aria-label="Room ID">----</div>
+    <div class="row center-row" style="margin-bottom:20px">
+      <button id="btn-copy-id" class="btn btn-primary" type="button">Copy ID</button>
+      <button id="btn-copy-link" class="btn btn-ghost" type="button">Copy link</button>
+    </div>
+    <div class="waiting" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      <span>Share this ID with the other person. Waiting for them to join...</span>
+    </div>
+    <div><button id="btn-cancel-wait" class="btn btn-ghost" type="button">Cancel</button></div>
+  </section>
+
+  <!-- CONNECTING -->
+  <section id="view-connecting" class="card center" hidden>
+    <h2 tabindex="-1">Connecting…</h2>
+    <div class="waiting" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="connecting-text">Setting up a direct connection…</span>
+    </div>
+    <div><button id="btn-cancel-connect" class="btn btn-ghost" type="button">Cancel</button></div>
+  </section>
+
+  <!-- CHANNEL -->
+  <section id="view-channel" hidden>
+    <div class="card">
+      <div class="channel-head">
+        <div>
+          <h2 tabindex="-1" class="sr-only">Channel</h2>
+          <div class="pill" role="status"><span class="dot" aria-hidden="true"></span>Connected successfully</div>
+          <div class="channel-meta"><span id="channel-room"></span> · <span id="channel-timer"></span></div>
+        </div>
+        <button id="btn-leave" class="btn btn-danger" type="button">Leave channel</button>
+      </div>
+
+      <div id="drop" class="drop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <strong class="desktop-only">Drag &amp; drop files here</strong>
+        <span class="or desktop-only">or</span>
+        <button id="btn-pick" class="btn btn-primary" type="button">Choose files</button>
+        <input id="file-input" class="sr-only" type="file" multiple tabindex="-1" aria-label="Choose files to send">
+        <span class="or">Multiple files supported · up to 1 GB each</span>
+      </div>
+
+      <div class="transfers-head"><h3>Transfers</h3></div>
+      <div id="empty" class="empty">No files yet. Files you send and receive will show up here.</div>
+      <ul id="files" class="files" aria-live="polite"></ul>
+    </div>
+    <p class="footer-note">Files go directly between your browsers and are never uploaded to a server.</p>
+  </section>
+
+  <!-- CLOSED -->
+  <section id="view-closed" class="card center" hidden>
+    <svg id="closed-icon" class="closed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+    <h2 tabindex="-1" id="closed-title">Channel closed</h2>
+    <p id="closed-text" class="muted" role="status"></p>
+    <div id="closed-files-wrap" style="text-align:left;margin:20px 0" hidden>
+      <h3>Files you received</h3>
+      <p class="muted small">Save them now: they disappear when you leave this page.</p>
+      <ul id="closed-files" class="files"></ul>
+    </div>
+    <button id="btn-back" class="btn btn-primary" type="button">Back to start</button>
+  </section>
+  <footer class="site-foot">
+    <a href="how-it-works.html">How it works</a><span aria-hidden="true"> · </span><a href="https://github.com/lianshao09/Directshare" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+  </footer>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script type="module">
+  // Direct share (static). No backend: Trystero uses public Nostr relays only to introduce the two
+  // browsers (signaling is encrypted with the room code as password). Files travel over WebRTC.
+  //
+  // Room id  = first 32 hex chars of SHA-256("directshare-v1:" + CODE)   (what relays see)
+  // Password = CODE                                                       (never sent to relays)
+  // Roles: whoever clicks "Create" is the host and accepts exactly ONE joiner; later joiners get "full".
+
+  const TRYSTERO_URL = 'https://cdn.jsdelivr.net/npm/trystero@0.21.5/+esm';
+  const APP_ID = 'directshare-v1';
+  const RELAYS = [
+    'wss://nos.lol',
+    'wss://relay.primal.net',
+    'wss://relay.snort.social'
+  ];
+
+  const ROOM_TTL_MS = 60 * 60 * 1000;        // channel auto-closes after 60 minutes
+  const FIND_TIMEOUT_MS = 30000;             // joiner gives up if nobody answers
+  const PING_MS = 5000;                      // liveness ping to the other user
+  const WATCHDOG_MS = 25000;                 // no message for this long = other user gone
+  const HELLO_RETRY_MS = 3000;
+  const BLOCK = 256 * 1024;                  // read size from disk (Trystero chunks it to ~16 KiB)
+  const MAX_FILE_SIZE = 1024 * 1024 * 1024;  // received files are held in memory
+  const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 symbols: no 0/O/1/I
+
+  const $ = (id) => document.getElementById(id);
+  const VIEWS = ['home', 'waiting', 'connecting', 'channel', 'closed'];
+
+  /* -------------------------------- state ------------------------------- */
+  function freshState() {
+    return {
+      room: null, ctlSend: null, blkSend: null,
+      role: null, code: null, partner: null,
+      connected: false, closed: false,
+      peerIds: new Set(), peersSeen: 0, lastSeen: 0, deadline: 0,
+      findTimer: null, helloTimer: null, pingTimer: null, watchTimer: null, clockTimer: null, expireTimer: null,
+      queue: [], pumping: false,
+      incoming: null,
+      items: new Map(),   // sent items by id
+      received: [],       // { name, size, url }
+    };
+  }
+  let S = freshState();
+
+  /* -------------------------------- helpers ------------------------------ */
+  function show(name) {
+    for (const v of VIEWS) $('view-' + v).hidden = v !== name;
+    $('brand').hidden = name === 'home';
+    const h = $('view-' + name).querySelector('h2');
+    if (h) h.focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+  }
+
+  function fmt(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    const units = ['KB', 'MB', 'GB', 'TB'];
+    let v = bytes / 1024, i = 0;
+    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+    return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)) + ' ' + units[i];
+  }
+
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  function cleanName(name) {
+    const n = String(name || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').trim().slice(0, 200);
+    return n || 'file';
+  }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 4500);
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+        document.body.append(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      } catch (__) { return false; }
+    }
+  }
+
+  function flashButton(btn, label) {
+    const old = btn.dataset.label || btn.textContent;
+    btn.dataset.label = old;
+    btn.textContent = label;
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { btn.textContent = old; }, 1600);
+  }
+
+  const channelOpen = (sess) => !!(sess.connected && sess.partner && sess.room && !sess.closed);
+  const hasActive = (sess) => !!sess.incoming || [...sess.items.values()].some((i) => i.status === 'queued' || i.status === 'active');
+
+  // fire-and-forget control message; never throws
+  function sendCtl(sess, obj, id) {
+    try {
+      const p = sess.ctlSend && sess.ctlSend(obj, id || sess.partner);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (_) { /* ignore */ }
+  }
+
+  /* ------------------------------ room code ------------------------------ */
+  function genCode() {
+    const b = new Uint8Array(8);
+    crypto.getRandomValues(b);
+    let r = '';
+    for (const x of b) r += CODE_ALPHABET[x & 31]; // 256 / 32 = 8, so no modulo bias
+    return r.slice(0, 4) + '-' + r.slice(4);
+  }
+
+  function normalizeCode(input) {
+    const raw = String(input || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return raw.length === 8 ? raw.slice(0, 4) + '-' + raw.slice(4) : null;
+  }
+
+  async function roomIdFromCode(code) {
+    const bytes = new TextEncoder().encode('directshare-v1:' + code);
+    const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    return [...hash].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+  }
+
+  /* ------------------------------- teardown ------------------------------ */
+  function teardown(sess) {
+    clearTimeout(sess.findTimer);
+    clearInterval(sess.helloTimer);
+    clearInterval(sess.pingTimer);
+    clearInterval(sess.watchTimer);
+    clearInterval(sess.clockTimer);
+    clearTimeout(sess.expireTimer);
+    const room = sess.room;
+    sess.room = null;
+    if (room) { try { Promise.resolve(room.leave()).catch(() => {}); } catch (_) { /* ignore */ } }
+  }
+
+  function resetUi() {
+    $('files').textContent = '';
+    $('empty').hidden = false;
+    $('closed-files').textContent = '';
+    $('closed-files-wrap').hidden = true;
+    $('join-error').textContent = '';
+    $('home-error').textContent = '';
+  }
+
+  function goHome(errorTarget, message) {
+    const old = S;
+    old.closed = true;
+    teardown(old);
+    for (const r of old.received) URL.revokeObjectURL(r.url);
+    S = freshState();
+    resetUi();
+    setBusy(false);
+    show('home');
+    if (message) $(errorTarget).textContent = message;
+  }
+
+  function setBusy(busy) {
+    $('btn-create').disabled = busy;
+    $('btn-join').disabled = busy || $('join-id').value.length !== 9;
+    $('join-id').disabled = busy;
+  }
+
+  /* ---------------------------- Trystero loading ------------------------- */
+  const libReady = import(TRYSTERO_URL)
+    .then((m) => { if (typeof m.joinRoom !== 'function') throw new Error('trystero'); return m; })
+    .catch(() => null);
+
+  /* -------------------------------- channel ------------------------------ */
+  async function enterRoom(role, code) {
+    if (S.room || S.role) return;
+    resetUi();
+    setBusy(true);
+    const sess = (S = freshState());
+    sess.role = role;
+    sess.code = code;
+    const errTarget = role === 'join' ? 'join-error' : 'home-error';
+
+    const lib = await libReady;
+    if (sess !== S) return;
+    if (!lib) return goHome(errTarget, 'Couldn’t load the connection library. Check your network and reload.');
+    if (!crypto.subtle) return goHome(errTarget, 'Your browser needs a secure (HTTPS) page for this.');
+
+    let roomId;
+    try { roomId = await roomIdFromCode(code); }
+    catch (_) { return goHome(errTarget, 'Couldn’t prepare the channel. Try again.'); }
+    if (sess !== S) return;
+
+    let room;
+    try { room = lib.joinRoom({ appId: APP_ID, password: code, relayUrls: RELAYS }, roomId, () => {}); }
+    catch (_) { return goHome(errTarget, 'Couldn’t open the channel. Try again in a moment.'); }
+    sess.room = room;
+
+    const [ctlSend, onCtl] = room.makeAction('ctl');
+    const [blkSend, onBlk] = room.makeAction('blk');
+    sess.ctlSend = ctlSend;
+    sess.blkSend = blkSend;
+
+    onCtl((msg, id) => { if (sess === S && !sess.closed) onControl(sess, msg, id); });
+    onBlk((data, id, meta) => { if (sess === S && !sess.closed) onBlock(sess, data, id, meta); });
+
+    room.onPeerJoin((id) => {
+      if (sess !== S || sess.closed) return;
+      sess.peerIds.add(id);
+      sess.peersSeen++;
+      if (sess.role === 'join' && !sess.partner) sendCtl(sess, { t: 'hello' }, id);
+    });
+
+    room.onPeerLeave((id) => {
+      if (sess !== S || sess.closed) return;
+      sess.peerIds.delete(id);
+      if (id === sess.partner) closeChannel('peer-left');
+    });
+
+    if (role === 'create') {
+      startClock(sess, ROOM_TTL_MS);
+      $('room-id-display').textContent = code;
+      show('waiting');
+    } else {
+      $('connecting-text').textContent = 'Looking for the channel… this can take a few seconds.';
+      show('connecting');
+      // keep knocking: covers a hello that arrived before the host was ready
+      sess.helloTimer = setInterval(() => {
+        if (sess.partner) return;
+        for (const id of sess.peerIds) sendCtl(sess, { t: 'hello' }, id);
+      }, HELLO_RETRY_MS);
+      sess.findTimer = setTimeout(() => {
+        if (sess !== S || sess.partner || sess.closed) return;
+        if (sess.peersSeen === 0) {
+          goHome('join-error', 'No channel found with that ID. Check it, and make sure the other person is still waiting.');
+        } else {
+          closeChannel('connect-failed');
+        }
+      }, FIND_TIMEOUT_MS);
+    }
+  }
+
+  function startClock(sess, expiresIn) {
+    const ms = Math.max(0, Number(expiresIn) || 0);
+    sess.deadline = Date.now() + ms;
+    const tick = () => {
+      const left = Math.max(0, sess.deadline - Date.now());
+      $('channel-timer').textContent = 'auto-closes in ' + Math.max(1, Math.ceil(left / 60000)) + ' min';
+    };
+    tick();
+    $('channel-room').textContent = 'Room ' + (sess.code || '');
+    clearInterval(sess.clockTimer);
+    sess.clockTimer = setInterval(tick, 15000);
+    clearTimeout(sess.expireTimer);
+    sess.expireTimer = setTimeout(() => { if (sess === S) closeChannel('expired'); }, ms);
+  }
+
+  function onConnected(sess, partner) {
+    sess.partner = partner;
+    sess.connected = true;
+    sess.lastSeen = Date.now();
+    clearTimeout(sess.findTimer);
+    clearInterval(sess.helloTimer);
+    sess.pingTimer = setInterval(() => sendCtl(sess, { t: 'p' }), PING_MS);
+    sess.watchTimer = setInterval(() => {
+      if (Date.now() - sess.lastSeen > WATCHDOG_MS) closeChannel('peer-left');
+    }, 5000);
+    show('channel');
+  }
+
+  function onControl(sess, msg, id) {
+    if (!msg || typeof msg !== 'object') return;
+
+    // A third person: tell them the channel is taken, ignore everything else from them.
+    if (sess.partner && id !== sess.partner) {
+      if (msg.t === 'hello' && sess.role === 'create') sendCtl(sess, { t: 'full' }, id);
+      return;
+    }
+
+    if (id === sess.partner) sess.lastSeen = Date.now();
+
+    switch (msg.t) {
+      case 'hello':
+        if (sess.role !== 'create' || sess.partner) return;
+        sendCtl(sess, { t: 'accept', expiresIn: Math.max(0, sess.deadline - Date.now()) }, id);
+        onConnected(sess, id);
+        break;
+
+      case 'accept':
+        if (sess.role !== 'join' || sess.partner) return;
+        startClock(sess, msg.expiresIn);
+        onConnected(sess, id);
+        break;
+
+      case 'full':
+        if (sess.role === 'join' && !sess.partner) goHome('join-error', 'That channel already has two users.');
+        break;
+
+      case 'meta':   receiveMeta(sess, msg); break;
+      case 'end':    receiveEnd(sess, msg); break;
+      case 'abort':  receiveAbort(sess, msg); break;
+      default: break; // 'p' (ping) only refreshes lastSeen
+    }
+  }
+
+  function onBlock(sess, data, id, meta) {
+    if (id !== sess.partner) return;
+    sess.lastSeen = Date.now();
+    receiveBlock(sess, data, meta);
+  }
+
+  /* ------------------------------ transfer UI ---------------------------- */
+  function createItem(dir, name, size) {
+    const li = el('li', 'file');
+    const top = el('div', 'file-top');
+    const badge = el('span', 'badge ' + (dir === 'send' ? 'send' : 'recv'), dir === 'send' ? 'Sent' : 'Received');
+    const nameEl = el('span', 'file-name', name);
+    nameEl.title = name;
+    top.append(badge, nameEl);
+
+    const bar = el('div', 'bar');
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-label', name);
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', '100');
+    bar.setAttribute('aria-valuenow', '0');
+    const fill = el('div', 'bar-fill');
+    bar.append(fill);
+    const meta = el('div', 'file-meta', fmt(size));
+    li.append(top, bar, meta);
+
+    $('files').prepend(li);
+    $('empty').hidden = true;
+
+    let last = 0;
+    return {
+      el: li, size, status: 'queued',
+      progress(done, force) {
+        const now = performance.now();
+        if (!force && now - last < 60) return;
+        last = now;
+        const pct = size ? Math.min(100, (done / size) * 100) : 100;
+        fill.style.width = pct + '%';
+        bar.setAttribute('aria-valuenow', String(Math.round(pct)));
+        meta.textContent = fmt(Math.min(done, size)) + ' / ' + fmt(size) + ' · ' + Math.floor(pct) + '%';
+      },
+      active() { this.status = 'active'; this.progress(0, true); },
+      finish(url) {
+        this.status = 'done';
+        li.classList.add('ok');
+        fill.style.width = '100%';
+        bar.setAttribute('aria-valuenow', '100');
+        meta.textContent = fmt(size) + ' · Done';
+        if (url) {
+          const a = el('a', 'btn btn-ghost btn-sm', 'Save');
+          a.href = url;
+          a.download = name;
+          top.append(a);
+        }
+      },
+      fail(msg) {
+        if (this.status === 'done' || this.status === 'failed') return;
+        this.status = 'failed';
+        li.classList.add('err');
+        meta.textContent = msg;
+      },
+      queued() { meta.textContent = 'Waiting in queue · ' + fmt(size); },
+    };
+  }
+
+  /* -------------------------------- sending ------------------------------ */
+  function enqueue(files) {
+    const sess = S;
+    if (!channelOpen(sess)) return;
+    let tooBig = 0;
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) { tooBig++; continue; }
+      const id = uid();
+      const item = createItem('send', file.name, file.size);
+      item.id = id;
+      item.file = file;
+      item.queued();
+      sess.items.set(id, item);
+      sess.queue.push(item);
+    }
+    if (tooBig) toast(tooBig + (tooBig === 1 ? ' file is' : ' files are') + ' over 1 GB and was skipped.');
+    pump(sess);
+  }
+
+  async function pump(sess) {
+    if (sess.pumping) return;
+    sess.pumping = true;
+    try {
+      while (sess.queue.length && channelOpen(sess)) {
+        const item = sess.queue.shift();
+        try {
+          await sendFile(sess, item);
+        } catch (_) {
+          item.fail(channelOpen(sess) ? 'Could not read this file' : 'Interrupted');
+          if (channelOpen(sess)) sendCtl(sess, { t: 'abort', id: item.id });
+        }
+      }
+    } finally {
+      sess.pumping = false;
+    }
+  }
+
+  async function sendFile(sess, item) {
+    const file = item.file;
+    item.active();
+    await sess.ctlSend({ t: 'meta', id: item.id, name: file.name, size: file.size }, sess.partner);
+
+    let offset = 0;
+    while (offset < file.size) {
+      if (!channelOpen(sess)) throw new Error('closed');
+      const block = new Uint8Array(await file.slice(offset, offset + BLOCK).arrayBuffer());
+      // Trystero splits this into ~16 KiB data-channel messages and waits for the buffer to drain.
+      await sess.blkSend(block, sess.partner, { id: item.id });
+      offset += block.length;
+      item.progress(offset);
+    }
+
+    if (!channelOpen(sess)) throw new Error('closed');
+    await sess.ctlSend({ t: 'end', id: item.id }, sess.partner);
+    item.finish();
+  }
+
+  /* ------------------------------- receiving ----------------------------- */
+  function receiveMeta(sess, m) {
+    if (sess.incoming) { sess.incoming.item.fail('Interrupted'); sess.incoming = null; }
+    const size = Number(m.size);
+    if (!Number.isFinite(size) || size < 0 || size > MAX_FILE_SIZE || typeof m.id !== 'string') return;
+    const name = cleanName(m.name);
+    const item = createItem('recv', name, size);
+    item.active();
+    sess.incoming = { id: m.id, name, size, chunks: [], received: 0, item };
+  }
+
+  function receiveBlock(sess, data, meta) {
+    const inc = sess.incoming;
+    if (!inc || !meta || meta.id !== inc.id || !(data instanceof Uint8Array)) return;
+    inc.received += data.byteLength;
+    if (inc.received > inc.size) { inc.item.fail('Received more data than expected'); sess.incoming = null; return; }
+    inc.chunks.push(data);
+    inc.item.progress(inc.received);
+  }
+
+  function receiveEnd(sess, m) {
+    const inc = sess.incoming;
+    if (!inc || inc.id !== m.id) return;
+    sess.incoming = null;
+    if (inc.received !== inc.size) { inc.item.fail('Incomplete transfer'); return; }
+    const blob = new Blob(inc.chunks, { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    sess.received.push({ name: inc.name, size: inc.size, url });
+    inc.item.finish(url);
+  }
+
+  function receiveAbort(sess, m) {
+    const inc = sess.incoming;
+    if (inc && inc.id === m.id) { inc.item.fail('Cancelled by sender'); sess.incoming = null; }
+  }
+
+  /* ------------------------------ closing / leaving ---------------------- */
+  const CLOSE_MESSAGES = {
+    'peer-left': ['Channel closed', 'The other user has disconnected. The channel is now closed.'],
+    'expired': ['Channel expired', 'This channel was closed automatically after 60 minutes.'],
+    'connect-failed': ['Couldn’t connect', 'A direct connection to the other user couldn’t be established. This can happen on restrictive networks (some corporate or mobile networks need a relay server).'],
+    'left': ['You left the channel', 'The channel is now closed for both of you.'],
+  };
+
+  function closeChannel(reason) {
+    const sess = S;
+    if (!sess || sess.closed) return;
+    sess.closed = true;
+
+    for (const item of sess.items.values()) item.fail('Interrupted');
+    if (sess.incoming) { sess.incoming.item.fail('Interrupted'); sess.incoming = null; }
+    sess.queue.length = 0;
+    teardown(sess);
+
+    const [title, text] = CLOSE_MESSAGES[reason] || CLOSE_MESSAGES['peer-left'];
+    $('closed-title').textContent = title;
+    $('closed-text').textContent = text;
+    $('closed-icon').classList.toggle('neutral', reason === 'left');
+
+    const list = $('closed-files');
+    list.textContent = '';
+    for (const f of sess.received) {
+      const li = el('li', 'file ok');
+      const top = el('div', 'file-top');
+      const name = el('span', 'file-name', f.name);
+      name.title = f.name;
+      const a = el('a', 'btn btn-primary btn-sm', 'Save');
+      a.href = f.url;
+      a.download = f.name;
+      top.append(el('span', 'badge recv', 'Received'), name, a);
+      li.append(top, el('div', 'file-meta', fmt(f.size)));
+      list.append(li);
+    }
+    $('closed-files-wrap').hidden = sess.received.length === 0;
+    show('closed');
+  }
+
+  /* --------------------------------- wiring ------------------------------ */
+  $('btn-create').addEventListener('click', () => enterRoom('create', genCode()));
+
+  const joinInput = $('join-id');
+  joinInput.addEventListener('input', () => {
+    const v = joinInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+    joinInput.value = v.length > 4 ? v.slice(0, 4) + '-' + v.slice(4) : v;
+    $('btn-join').disabled = joinInput.value.length !== 9;
+    $('join-error').textContent = '';
+  });
+
+  $('join-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const code = normalizeCode(joinInput.value);
+    if (!code) { $('join-error').textContent = 'That doesn’t look like a valid ID. It should look like ABCD-2345.'; return; }
+    enterRoom('join', code);
+  });
+
+  $('btn-copy-id').addEventListener('click', async (e) => {
+    const ok = await copyText(S.code || '');
+    flashButton(e.currentTarget, ok ? 'Copied ✓' : 'Press Ctrl+C');
+  });
+  $('btn-copy-link').addEventListener('click', async (e) => {
+    const link = location.origin + location.pathname + '#' + (S.code || '');
+    const ok = await copyText(link);
+    flashButton(e.currentTarget, ok ? 'Link copied ✓' : 'Copy failed');
+  });
+
+  $('btn-cancel-wait').addEventListener('click', () => goHome());
+  $('btn-cancel-connect').addEventListener('click', () => goHome());
+  $('btn-leave').addEventListener('click', () => closeChannel('left'));
+  $('btn-back').addEventListener('click', () => goHome());
+
+  // file picking
+  const fileInput = $('file-input');
+  $('btn-pick').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    enqueue([...fileInput.files]);
+    fileInput.value = '';
+  });
+
+  // drag & drop
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => {
+    e.preventDefault();
+    drop.classList.add('over');
+  }));
+  drop.addEventListener('dragleave', (e) => {
+    if (!drop.contains(e.relatedTarget)) drop.classList.remove('over');
+  });
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    drop.classList.remove('over');
+    const files = [];
+    let folders = 0;
+    const items = e.dataTransfer && e.dataTransfer.items;
+    if (items && items.length) {
+      for (const it of items) {
+        if (it.kind !== 'file') continue;
+        const entry = it.webkitGetAsEntry ? it.webkitGetAsEntry() : null;
+        if (entry && entry.isDirectory) { folders++; continue; }
+        const f = it.getAsFile();
+        if (f) files.push(f);
+      }
+    } else if (e.dataTransfer) {
+      files.push(...e.dataTransfer.files);
+    }
+    if (folders) toast('Folders can’t be sent. Zip them first.');
+    if (files.length) enqueue(files);
+  });
+  // never let the browser navigate to a file dropped outside the zone
+  window.addEventListener('dragover', (e) => e.preventDefault());
+  window.addEventListener('drop', (e) => e.preventDefault());
+
+  window.addEventListener('beforeunload', (e) => {
+    if (!S.closed && hasActive(S)) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // #XXXX-XXXX in the URL prefills the join form
+  (function prefillFromHash() {
+    let raw = '';
+    try { raw = decodeURIComponent(location.hash.slice(1)); } catch (_) { /* ignore */ }
+    const code = normalizeCode(raw);
+    if (code) {
+      joinInput.value = code;
+      $('btn-join').disabled = false;
+    }
+  })();
+
+  // buttons stay disabled until the connection library has loaded
+  setBusy(true);
+  if (!window.RTCPeerConnection) {
+    $('home-error').textContent = 'This browser doesn’t support WebRTC, so direct transfers aren’t possible.';
+  } else {
+    libReady.then((lib) => {
+      if (lib) setBusy(false);
+      else $('home-error').textContent = 'Couldn’t load the connection library. Check your network and reload.';
+    });
+  }
+</script>
+</body>
+</html>
