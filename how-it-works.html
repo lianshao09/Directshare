@@ -143,12 +143,12 @@
 
     <h2>Step by step</h2>
     <ol>
-      <li><strong>You create a channel.</strong> Your browser makes a random ID in the form <code>XXXX-XXXX</code> (8 characters from a 32-symbol alphabet, about 40 bits). You become the host of that channel.</li>
+      <li><strong>You create a channel.</strong> Your browser makes a random ID in the form <code>XXXX-XXXX</code> (8 characters from a 32-symbol alphabet, about 40 bits). You become the host of that channel. You can share the ID, an invite link, or a QR code that opens the invite link on a phone.</li>
       <li><strong>Your browser hashes the ID.</strong> It computes SHA-256 of the ID with a fixed prefix and keeps the first 32 hex characters. That is the room name. The ID itself is never sent anywhere.</li>
       <li><strong>The other person enters the ID.</strong> Their browser computes the same room name. Using the open-source library <a href="https://github.com/dmotz/trystero" rel="noopener noreferrer">Trystero</a>, both browsers post small signaling notes to public Nostr relays, tagged with that room name. The notes are encrypted with the ID as password, so relays only see unreadable data.</li>
       <li><strong>A direct connection opens.</strong> When the two browsers read each other's notes they set up a WebRTC connection. WebRTC data channels are encrypted in transit (DTLS).</li>
       <li><strong>The host accepts exactly one person.</strong> The first joiner is accepted. Anyone who tries afterwards is told the channel is full and is ignored.</li>
-      <li><strong>Files go browser to browser.</strong> Each file is read in small pieces, sent over the data channel, and put back together in the other browser's memory. Nothing is sent to the site's host or to the relays, and nothing is written to a database.</li>
+      <li><strong>Files go browser to browser.</strong> Each file is read in small pieces, sent over the data channel, and put back together in the other browser's memory. Nothing is sent to the site's host or to the relays, and nothing is written to a database. You see the progress, speed and time left, and either person can cancel a transfer at any time.</li>
       <li><strong>The channel closes for both of you.</strong> If either person clicks Leave, closes the tab, loses connection, or 60 minutes pass, the other side is told right away and the channel ends. There is no history to recover.</li>
     </ol>
 
@@ -163,22 +163,26 @@
           <tr><td>The site's host</td><td>That someone downloaded this page (IP, time)</td><td>IDs, file names, file contents</td></tr>
           <tr><td>Nostr relays</td><td>Your IP, the hashed room name, encrypted signaling data</td><td>The ID, file names, file contents</td></tr>
           <tr><td>STUN servers</td><td>Your IP, to help work out your public address</td><td>IDs, file names, file contents</td></tr>
-          <tr><td>The CDN</td><td>That the Trystero library was loaded (IP, time)</td><td>IDs, file names, file contents</td></tr>
           <tr><td>Your network provider</td><td>That you connected to the peer and to relays, and how much data moved</td><td>File contents</td></tr>
         </tbody>
       </table>
     </div>
 
+    <h2>Install it</h2>
+    <p>Direct share can be installed like an app. In Chrome, Edge or on Android use the Install app button on the home page or the browser menu. On iPhone and iPad use Share, then Add to Home Screen.</p>
+    <p>The installed app is the same page. Your browser keeps a copy of the page itself (not your files, IDs or anything you send), so it opens quickly and the page also opens offline. Sending files still needs a connection, and when you are online the page is always fetched fresh, so updates arrive on their own.</p>
+
     <h2>Known limits</h2>
     <ul>
+      <li><strong>Both pages must stay open until a transfer finishes.</strong> If either person closes the tab, switches app, locks the phone or loses connection, the transfer stops and is not resumed. While a transfer runs the page asks the screen to stay on (where the browser allows it), and it warns you before you close the tab or leave.</li>
       <li><strong>The ID is the only lock.</strong> Anyone who learns it before the right person joins can take the one free place. Share it over a channel you trust, and check that the person you meant to send to is the one connected.</li>
       <li><strong>The two-user rule and the 60-minute timer are enforced by the browsers,</strong> not by a server. They are not a security boundary against someone who modifies their own copy of the page.</li>
       <li><strong>Your IP is visible to the other person.</strong> That is how direct connections work. If that matters, this tool is not the right one.</li>
       <li><strong>Both people must be online at the same time.</strong> Files can't wait for someone who isn't there.</li>
       <li><strong>Some networks block it.</strong> There is no TURN relay, so strict firewalls, some mobile networks and some corporate Wi-Fi can stop the connection. Try another network.</li>
       <li><strong>Files are held in memory while they arrive.</strong> That is why each file is limited to 1 GB. Save a file before you leave, because it disappears when the page closes.</li>
-      <li><strong>It depends on public services.</strong> If the public relays or the CDN that serves the Trystero library are down, connecting fails.</li>
-      <li><strong>It trusts the code you load.</strong> If the host or the CDN were compromised, the page could be altered. That is why the source is public and small.</li>
+      <li><strong>It depends on public relays.</strong> If they are down or unreachable from your network, connecting fails. Everything else is served from this site, with no third-party scripts.</li>
+      <li><strong>It trusts the code you load.</strong> If the host were compromised, the page could be altered. That is why the source is public and small.</li>
     </ul>
 
     <p class="note">Not for situations where your safety depends on anonymity. This tool keeps files off servers, not you off the network.</p>

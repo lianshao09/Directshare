@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b0d0b">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Direct share">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="referrer" content="no-referrer">
 <link rel="canonical" href="https://directshare.site/">
 <meta property="og:type" content="website">
@@ -228,6 +234,18 @@
   .site-foot { margin: 28px 4px 8px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; text-align: center; }
   .site-foot a { color: var(--accent); text-underline-offset: 3px; }
 
+  /* ---- cancel, QR, keep-open note ---- */
+  .cancel-btn { flex: none; min-height: 32px; padding: 0 12px; }
+  .file.cancelled .bar-fill { background: var(--muted); }
+  .file.cancelled .file-meta { color: var(--muted); }
+  .qr-wrap { margin: 0 0 20px; }
+  .qr-box { display: inline-block; padding: 10px; background: #fff; border-radius: 14px; line-height: 0; }
+  .qr-box svg { width: min(220px, 62vw); height: auto; display: block; }
+  .qr-wrap p { margin: 8px 0 0; }
+  .keep-open { margin-top: 14px; text-align: left; }
+  .keep-open.warn { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+  .closed-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
   /* ---- home: two-column on desktop, like closedroom.site ---- */
   .home { display: flex; flex-direction: column; }
   .home-left { display: contents; }
@@ -278,6 +296,10 @@
         <h1 class="display">Direct<br>share</h1>
         <p class="dek">Browser-to-browser file transfer. Files go straight between two browsers. Nothing is uploaded or stored, no account needed.</p>
         <div class="row intro-links">
+          <button id="btn-install" class="btn btn-ghost btn-sm" type="button" hidden>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+            Install app
+          </button>
           <a class="btn btn-ghost btn-sm" href="how-it-works.html">How it works</a>
           <a class="btn btn-ghost btn-sm" href="https://github.com/lianshao09/Directshare" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -331,6 +353,10 @@
       <button id="btn-copy-id" class="btn btn-primary" type="button">Copy ID</button>
       <button id="btn-copy-link" class="btn btn-ghost" type="button">Copy invite link</button>
     </div>
+    <div id="qr-wrap" class="qr-wrap" hidden>
+      <div id="qr" class="qr-box"></div>
+      <p class="muted small">Scan with a phone to open the invite link.</p>
+    </div>
     <div class="waiting" role="status">
       <span class="spinner" aria-hidden="true"></span>
       <span>Share this ID with the other person. Waiting for them to join...</span>
@@ -369,6 +395,11 @@
         <span class="or">Multiple files supported · up to 1 GB each</span>
       </div>
 
+      <div id="keep-open" class="note-box keep-open">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span id="keep-text"></span>
+      </div>
+
       <div class="transfers-head"><h3>Transfers</h3></div>
       <div id="empty" class="empty">No files yet. Files you send and receive will show up here.</div>
       <ul id="files" class="files" aria-live="polite"></ul>
@@ -386,7 +417,10 @@
       <p class="muted small">Save them now: they disappear when you leave this page.</p>
       <ul id="closed-files" class="files"></ul>
     </div>
-    <button id="btn-back" class="btn btn-primary" type="button">Back to start</button>
+    <div class="closed-actions">
+      <button id="btn-retry" class="btn btn-primary" type="button" hidden>Try again</button>
+      <button id="btn-back" class="btn btn-primary" type="button">Back to start</button>
+    </div>
   </section>
   <footer class="site-foot">
     <a href="how-it-works.html">How it works</a><span aria-hidden="true"> · </span><a href="https://github.com/lianshao09/Directshare" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
@@ -403,7 +437,7 @@
   // Password = CODE                                                       (never sent to relays)
   // Roles: whoever clicks "Create" is the host and accepts exactly ONE joiner; later joiners get "full".
 
-  const TRYSTERO_URL = 'https://cdn.jsdelivr.net/npm/trystero@0.21.5/+esm';
+  const TRYSTERO_URL = './trystero.js';
   const APP_ID = 'directshare-v1';
   const RELAYS = [
     'wss://nos.lol',
@@ -432,6 +466,7 @@
       connected: false, closed: false,
       peerIds: new Set(), peersSeen: 0, lastSeen: 0, deadline: 0,
       pending: null, cand: null, candExpires: 0,   // handshake: host's joiner / joiner's host
+      hintTimer: null,
       findTimer: null, helloTimer: null, pingTimer: null, watchTimer: null, clockTimer: null, expireTimer: null,
       queue: [], pumping: false,
       incoming: null,
@@ -516,8 +551,9 @@
   function sendCtl(sess, obj, id) {
     try {
       const p = sess.ctlSend && sess.ctlSend(obj, id || sess.partner);
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+      if (p && typeof p.catch === 'function') return p.catch(() => {});
     } catch (_) { /* ignore */ }
+    return Promise.resolve();
   }
 
   /* ------------------------------ room code ------------------------------ */
@@ -541,8 +577,11 @@
   }
 
   /* ------------------------------- teardown ------------------------------ */
+  let lastLeave = Promise.resolve(); // resolves when the previous room has fully been left
+
   function teardown(sess) {
     clearTimeout(sess.findTimer);
+    clearTimeout(sess.hintTimer);
     clearInterval(sess.helloTimer);
     clearInterval(sess.pingTimer);
     clearInterval(sess.watchTimer);
@@ -550,10 +589,14 @@
     clearTimeout(sess.expireTimer);
     const room = sess.room;
     sess.room = null;
-    if (room) { try { Promise.resolve(room.leave()).catch(() => {}); } catch (_) { /* ignore */ } }
+    if (room) {
+      try { lastLeave = Promise.all([lastLeave, Promise.resolve(room.leave()).catch(() => {})]); } catch (_) { /* ignore */ }
+    }
   }
 
   function resetUi() {
+    $('qr').textContent = '';
+    $('qr-wrap').hidden = true;
     $('files').textContent = '';
     $('empty').hidden = false;
     $('closed-files').textContent = '';
@@ -568,6 +611,7 @@
     teardown(old);
     for (const r of old.received) URL.revokeObjectURL(r.url);
     S = freshState();
+    refreshActivity(); // releases the wake lock
     resetUi();
     setBusy(false);
     show('home');
@@ -598,14 +642,15 @@
     const errTarget = role === 'join' ? 'join-error' : 'home-error';
 
     const lib = await libReady;
-    if (sess !== S) return;
+    await lastLeave;
+    if (sess !== S || sess.closed) return;
     if (!lib) return goHome(errTarget, 'Couldn’t load the connection library. Check your network and reload.');
     if (!crypto.subtle) return goHome(errTarget, 'Your browser needs a secure (HTTPS) page for this.');
 
     let roomId;
     try { roomId = await roomIdFromCode(code); }
     catch (_) { return goHome(errTarget, 'Couldn’t prepare the channel. Try again.'); }
-    if (sess !== S) return;
+    if (sess !== S || sess.closed) return;
 
     let room;
     try { room = lib.joinRoom({ appId: APP_ID, password: code, relayUrls: RELAYS }, roomId, () => {}); }
@@ -624,6 +669,7 @@
       if (sess !== S || sess.closed) return;
       sess.peerIds.add(id);
       sess.peersSeen++;
+      if (sess.role === 'join' && !sess.partner) $('connecting-text').textContent = 'Found the channel. Setting up a direct connection…';
       if (sess.role === 'join' && !sess.partner) sendCtl(sess, { t: 'hello' }, id);
     });
 
@@ -639,9 +685,14 @@
       startClock(sess, ROOM_TTL_MS);
       $('room-id-display').textContent = code;
       show('waiting');
+      renderQr(code);
     } else {
       $('connecting-text').textContent = 'Looking for the channel… this can take a few seconds.';
       show('connecting');
+      sess.hintTimer = setTimeout(() => {
+        if (sess !== S || sess.partner || sess.closed) return;
+        $('connecting-text').textContent = 'Still trying… Make sure the other person is still on the “Your channel is ready” screen.';
+      }, 10000);
       // keep knocking: covers a hello that arrived before the host was ready
       sess.helloTimer = setInterval(() => {
         if (sess.partner) return;
@@ -683,7 +734,9 @@
     sess.watchTimer = setInterval(() => {
       if (Date.now() - sess.lastSeen > WATCHDOG_MS) closeChannel('peer-left');
     }, 5000);
+    clearTimeout(sess.hintTimer);
     show('channel');
+    refreshActivity();
   }
 
   // Handshake: hello -> accept -> ready -> go. Both sides only show "connected" after a full round
@@ -738,6 +791,7 @@
       case 'meta':   receiveMeta(sess, msg); break;
       case 'end':    receiveEnd(sess, msg); break;
       case 'abort':  receiveAbort(sess, msg); break;
+      case 'cancel': receiveCancel(sess, msg); break;
       default: break; // 'p' (ping) only refreshes lastSeen
     }
   }
@@ -749,13 +803,30 @@
   }
 
   /* ------------------------------ transfer UI ---------------------------- */
+  const SPEED_WINDOW_MS = 3000;
+
+  function fmtEta(sec) {
+    if (!Number.isFinite(sec) || sec < 0) return '';
+    if (sec < 1) return '<1 s';
+    if (sec < 60) return Math.ceil(sec) + ' s';
+    if (sec < 3600) {
+      const m = Math.floor(sec / 60), r = Math.ceil(sec % 60);
+      if (r === 60) return (m + 1) + ' min';
+      return m < 10 ? m + ' min ' + r + ' s' : m + ' min';
+    }
+    return Math.floor(sec / 3600) + ' h ' + Math.round((sec % 3600) / 60) + ' min';
+  }
+
   function createItem(dir, name, size) {
     const li = el('li', 'file');
     const top = el('div', 'file-top');
     const badge = el('span', 'badge ' + (dir === 'send' ? 'send' : 'recv'), dir === 'send' ? 'Sent' : 'Received');
     const nameEl = el('span', 'file-name', name);
     nameEl.title = name;
-    top.append(badge, nameEl);
+    const cancelBtn = el('button', 'btn btn-ghost btn-sm cancel-btn', 'Cancel');
+    cancelBtn.type = 'button';
+    cancelBtn.setAttribute('aria-label', 'Cancel ' + name);
+    top.append(badge, nameEl, cancelBtn);
 
     const bar = el('div', 'bar');
     bar.setAttribute('role', 'progressbar');
@@ -771,40 +842,71 @@
     $('files').prepend(li);
     $('empty').hidden = true;
 
-    let last = 0;
-    return {
-      el: li, size, status: 'queued',
+    let last = 0, startedAt = 0;
+    const samples = []; // [time, bytes] over the last few seconds -> current speed
+    const item = {
+      el: li, size, status: 'queued', onCancel: null,
       progress(done, force) {
+        if (this.status === 'done' || this.status === 'failed' || this.status === 'cancelled') return;
         const now = performance.now();
         if (!force && now - last < 60) return;
         last = now;
         const pct = size ? Math.min(100, (done / size) * 100) : 100;
         fill.style.width = pct + '%';
         bar.setAttribute('aria-valuenow', String(Math.round(pct)));
-        meta.textContent = fmt(Math.min(done, size)) + ' / ' + fmt(size) + ' · ' + Math.floor(pct) + '%';
+
+        samples.push([now, done]);
+        while (samples.length > 2 && now - samples[0][0] > SPEED_WINDOW_MS) samples.shift();
+        let extra = '';
+        if (done < size && samples.length >= 2) {
+          const secs = (now - samples[0][0]) / 1000;
+          if (secs >= 0.4) {
+            const bps = (done - samples[0][1]) / secs;
+            if (bps > 0) extra = ' · ' + fmt(bps) + '/s · ' + fmtEta((size - done) / bps) + ' left';
+          }
+        }
+        meta.textContent = fmt(Math.min(done, size)) + ' / ' + fmt(size) + ' · ' + Math.floor(pct) + '%' + extra;
       },
-      active() { this.status = 'active'; this.progress(0, true); },
+      active() { this.status = 'active'; startedAt = performance.now(); this.progress(0, true); refreshActivity(); },
       finish(url) {
+        if (this.status === 'cancelled') return;
         this.status = 'done';
         li.classList.add('ok');
         fill.style.width = '100%';
         bar.setAttribute('aria-valuenow', '100');
-        meta.textContent = fmt(size) + ' · Done';
+        const secs = (performance.now() - startedAt) / 1000;
+        const avg = startedAt && size && secs >= 0.5 ? ' · ' + fmt(size / secs) + '/s avg' : '';
+        meta.textContent = fmt(size) + ' · Done' + avg;
+        cancelBtn.remove();
         if (url) {
           const a = el('a', 'btn btn-ghost btn-sm', 'Save');
           a.href = url;
           a.download = name;
           top.append(a);
         }
+        refreshActivity();
       },
       fail(msg) {
-        if (this.status === 'done' || this.status === 'failed') return;
+        if (this.status === 'done' || this.status === 'failed' || this.status === 'cancelled') return;
         this.status = 'failed';
         li.classList.add('err');
         meta.textContent = msg;
+        cancelBtn.remove();
+        refreshActivity();
+      },
+      cancel(msg) {
+        if (this.status === 'done' || this.status === 'failed' || this.status === 'cancelled') return;
+        this.status = 'cancelled';
+        this.cancelled = true;
+        li.classList.add('cancelled');
+        meta.textContent = msg;
+        cancelBtn.remove();
+        refreshActivity();
       },
       queued() { meta.textContent = 'Waiting in queue · ' + fmt(size); },
     };
+    cancelBtn.addEventListener('click', () => { cancelBtn.disabled = true; if (item.onCancel) item.onCancel(); });
+    return item;
   }
 
   /* -------------------------------- sending ------------------------------ */
@@ -819,9 +921,21 @@
       item.id = id;
       item.file = file;
       item.queued();
+      item.onCancel = () => {
+        if (sess !== S || sess.closed) return;
+        if (item.status === 'queued') {
+          const i = sess.queue.indexOf(item);
+          if (i >= 0) sess.queue.splice(i, 1);
+          item.cancel('Cancelled');
+        } else if (item.status === 'active') {
+          item.cancel('Cancelled');
+          item.abortSent = sendCtl(sess, { t: 'abort', id: item.id });
+        }
+      };
       sess.items.set(id, item);
       sess.queue.push(item);
     }
+    refreshActivity();
     if (tooBig) toast(tooBig + (tooBig === 1 ? ' file is' : ' files are') + ' over 1 GB and was skipped.');
     pump(sess);
   }
@@ -835,6 +949,7 @@
         try {
           await sendFile(sess, item);
         } catch (_) {
+          if (item.cancelled) { await item.abortSent; continue; } // announced; let it leave before the next file's 'meta'
           item.fail(channelOpen(sess) ? 'Could not read this file' : 'Interrupted');
           if (channelOpen(sess)) sendCtl(sess, { t: 'abort', id: item.id });
         }
@@ -851,6 +966,7 @@
 
     let offset = 0;
     while (offset < file.size) {
+      if (item.cancelled) throw new Error('cancelled');
       if (!channelOpen(sess)) throw new Error('closed');
       const block = new Uint8Array(await file.slice(offset, offset + BLOCK).arrayBuffer());
       // Trystero splits this into ~16 KiB data-channel messages and waits for the buffer to drain.
@@ -859,6 +975,7 @@
       item.progress(offset);
     }
 
+    if (item.cancelled) throw new Error('cancelled');
     if (!channelOpen(sess)) throw new Error('closed');
     await sess.ctlSend({ t: 'end', id: item.id }, sess.partner);
     item.finish();
@@ -871,8 +988,14 @@
     if (!Number.isFinite(size) || size < 0 || size > MAX_FILE_SIZE || typeof m.id !== 'string') return;
     const name = cleanName(m.name);
     const item = createItem('recv', name, size);
-    item.active();
+    item.onCancel = () => {
+      if (sess !== S || sess.closed) return;
+      if (sess.incoming && sess.incoming.id === m.id) sess.incoming = null; // drop what we have so far
+      item.cancel('Cancelled');
+      sendCtl(sess, { t: 'cancel', id: m.id });
+    };
     sess.incoming = { id: m.id, name, size, chunks: [], received: 0, item };
+    item.active();
   }
 
   function receiveBlock(sess, data, meta) {
@@ -897,14 +1020,23 @@
 
   function receiveAbort(sess, m) {
     const inc = sess.incoming;
-    if (inc && inc.id === m.id) { inc.item.fail('Cancelled by sender'); sess.incoming = null; }
+    if (inc && inc.id === m.id) { sess.incoming = null; inc.item.cancel('Cancelled by sender'); }
+  }
+
+  function receiveCancel(sess, m) {
+    if (!m || typeof m.id !== 'string') return;
+    const item = sess.items.get(m.id);
+    if (!item || (item.status !== 'queued' && item.status !== 'active')) return;
+    const i = sess.queue.indexOf(item);
+    if (i >= 0) sess.queue.splice(i, 1);
+    item.cancel('Cancelled by receiver'); // sendFile sees item.cancelled and stops
   }
 
   /* ------------------------------ closing / leaving ---------------------- */
   const CLOSE_MESSAGES = {
     'peer-left': ['Channel closed', 'The other user has disconnected. The channel is now closed.'],
     'expired': ['Channel expired', 'This channel was closed automatically after 60 minutes.'],
-    'connect-failed': ['Couldn’t connect', 'A direct connection to the other user couldn’t be established. This can happen on restrictive networks (some corporate or mobile networks need a relay server).'],
+    'connect-failed': ['Couldn’t connect', 'A direct connection to the other user couldn’t be established. Check that the other person is still waiting on their screen, then try again. On restrictive networks (some corporate or mobile networks) it may not work at all.'],
     'left': ['You left the channel', 'The channel is now closed for both of you.'],
   };
 
@@ -917,6 +1049,13 @@
     if (sess.incoming) { sess.incoming.item.fail('Interrupted'); sess.incoming = null; }
     sess.queue.length = 0;
     teardown(sess);
+    refreshActivity(); // releases the wake lock
+
+    // a joiner that couldn't connect can try the same ID again
+    retryCode = reason === 'connect-failed' && sess.role === 'join' ? sess.code : null;
+    $('btn-retry').hidden = !retryCode;
+    $('btn-back').classList.toggle('btn-primary', !retryCode);
+    $('btn-back').classList.toggle('btn-ghost', !!retryCode);
 
     const [title, text] = CLOSE_MESSAGES[reason] || CLOSE_MESSAGES['peer-left'];
     $('closed-title').textContent = title;
@@ -940,6 +1079,53 @@
     $('closed-files-wrap').hidden = sess.received.length === 0;
     show('closed');
   }
+
+  /* ------------------------ QR, "keep open" note, wake lock --------------- */
+  let retryCode = null;
+  let wakeLock = null, wakeReq = false;
+
+  async function renderQr(code) {
+    try {
+      const { qrSvg } = await import('./qr.js');
+      if (S.code !== code || S.closed || $('view-waiting').hidden) return;
+      $('qr').innerHTML = qrSvg(location.origin + location.pathname + '#' + code); // our own SVG, no user input
+      $('qr-wrap').hidden = false;
+    } catch (_) { /* the QR code is a nicety: the ID and link still work */ }
+  }
+
+  const KEEP_IDLE = 'Both tabs must stay open while files are being transferred. If either person closes the tab, locks the phone or loses connection, the transfer stops.';
+  const KEEP_BUSY = 'Transfer in progress. Keep this tab open and your screen on until it finishes, and ask the other person to do the same. If either tab closes, the transfer stops.';
+
+  function refreshActivity() {
+    const active = !!S && !S.closed && hasActive(S);
+    $('keep-open').classList.toggle('warn', active);
+    $('keep-text').textContent = active ? KEEP_BUSY : KEEP_IDLE;
+    syncWakeLock(active);
+  }
+
+  // Keep the screen on while a transfer runs (phones lock and cut the connection otherwise).
+  async function syncWakeLock(want) {
+    if (want) {
+      if (wakeLock || wakeReq || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+      wakeReq = true;
+      try {
+        const lock = await navigator.wakeLock.request('screen');
+        if (S && !S.closed && hasActive(S)) {
+          wakeLock = lock;
+          lock.addEventListener('release', () => { if (wakeLock === lock) wakeLock = null; });
+        } else {
+          lock.release().catch(() => {}); // the transfer ended while we were asking
+        }
+      } catch (_) { /* not supported or denied: the note above is the fallback */ }
+      finally { wakeReq = false; }
+    } else if (wakeLock) {
+      const lock = wakeLock;
+      wakeLock = null;
+      lock.release().catch(() => {});
+    }
+  }
+  // the browser drops the lock when the tab is hidden: take it again when we come back
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshActivity(); });
 
   /* --------------------------------- wiring ------------------------------ */
 
@@ -1013,7 +1199,17 @@
 
   $('btn-cancel-wait').addEventListener('click', () => goHome());
   $('btn-cancel-connect').addEventListener('click', () => goHome());
-  $('btn-leave').addEventListener('click', () => closeChannel('left'));
+  $('btn-leave').addEventListener('click', () => {
+    if (hasActive(S) && !window.confirm('A transfer is still in progress. Leave the channel anyway? It will stop for both of you.')) return;
+    closeChannel('left');
+  });
+  $('btn-retry').addEventListener('click', () => {
+    const code = retryCode;
+    if (!code) return;
+    goHome();
+    putCode(code);
+    enterRoom('join', code);
+  });
   $('btn-back').addEventListener('click', () => goHome());
 
   // file picking
@@ -1072,6 +1268,34 @@
       setPrimary('join');
     }
   })();
+
+  /* ---------------------------------- PWA ---------------------------------- */
+  // "Install app" appears only when the browser offers it (Chrome, Edge, Android). On iPhone/iPad
+  // use Share > Add to Home Screen. Nothing here touches the transfer logic.
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installEvent = e;
+    $('btn-install').hidden = false;
+  });
+  window.addEventListener('appinstalled', () => {
+    installEvent = null;
+    $('btn-install').hidden = true;
+  });
+  $('btn-install').addEventListener('click', async () => {
+    const ev = installEvent;
+    if (!ev) return;
+    installEvent = null;
+    $('btn-install').hidden = true;
+    try { await ev.prompt(); } catch (_) { /* ignore */ }
+  });
+
+  // The service worker keeps only this page's own files so it opens fast and offline.
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    const register = () => navigator.serviceWorker.register('sw.js').catch(() => {});
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register, { once: true });
+  }
 
   // buttons stay disabled until the connection library has loaded
   setBusy(true);
