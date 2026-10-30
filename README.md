@@ -13,6 +13,7 @@ If you find it useful, feel free to use it too.
 
 1. One person clicks **Create a channel** and gets a random ID (`XXXX-XXXX`).
 2. The other person clicks **Join a channel** and enters that ID, or opens the invite link / scans the QR code.
+   The receiver can save files one by one, with **Download all**, or as one **ZIP** built in the browser (no compression, nothing uploaded).
 3. Both browsers hash the ID (SHA-256, first 32 hex characters) to get the room name. The ID itself never leaves your browser.
 4. [Trystero](https://github.com/dmotz/trystero) uses public Nostr relays for signaling, encrypted with the ID as password.
 5. A direct, encrypted WebRTC connection opens and files go browser to browser.
@@ -51,7 +52,7 @@ To ship an update, change `VERSION` in `sw.js`.
 - Each person can see the other's IP address.
 - No TURN server, so some strict networks can block connections.
 - Files are held in memory while they arrive: 1 GB limit per file.
-- Both people must be online at the same time, and both pages must stay open until a transfer finishes. If either closes, locks the phone or loses connection, the transfer stops (it is not resumed).
+- Both people must be online at the same time, and both pages must stay open until a transfer finishes. If either closes the tab or loses connection, the transfer stops (it is not resumed). A device that is only away for a while (choosing photos, another app in front) is waited for, but phones may drop the connection after a long time in the background, especially iPhone.
 - Depends on public Nostr relays being reachable.
 
 ## License

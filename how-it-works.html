@@ -148,7 +148,7 @@
       <li><strong>The other person enters the ID.</strong> Their browser computes the same room name. Using the open-source library <a href="https://github.com/dmotz/trystero" rel="noopener noreferrer">Trystero</a>, both browsers post small signaling notes to public Nostr relays, tagged with that room name. The notes are encrypted with the ID as password, so relays only see unreadable data.</li>
       <li><strong>A direct connection opens.</strong> When the two browsers read each other's notes they set up a WebRTC connection. WebRTC data channels are encrypted in transit (DTLS).</li>
       <li><strong>The host accepts exactly one person.</strong> The first joiner is accepted. Anyone who tries afterwards is told the channel is full and is ignored.</li>
-      <li><strong>Files go browser to browser.</strong> Each file is read in small pieces, sent over the data channel, and put back together in the other browser's memory. Nothing is sent to the site's host or to the relays, and nothing is written to a database. You see the progress, speed and time left, and either person can cancel a transfer at any time.</li>
+      <li><strong>Files go browser to browser.</strong> Each file is read in small pieces, sent over the data channel, and put back together in the other browser's memory. Nothing is sent to the site's host or to the relays, and nothing is written to a database. You see the progress, speed and time left, and either person can cancel a transfer at any time. The person receiving can save the files one by one, or use Download all or Download ZIP. The ZIP is built in their browser from the files already received.</li>
       <li><strong>The channel closes for both of you.</strong> If either person clicks Leave, closes the tab, loses connection, or 60 minutes pass, the other side is told right away and the channel ends. There is no history to recover.</li>
     </ol>
 
@@ -174,7 +174,7 @@
 
     <h2>Known limits</h2>
     <ul>
-      <li><strong>Both pages must stay open until a transfer finishes.</strong> If either person closes the tab, switches app, locks the phone or loses connection, the transfer stops and is not resumed. While a transfer runs the page asks the screen to stay on (where the browser allows it), and it warns you before you close the tab or leave.</li>
+      <li><strong>Both pages must stay open until a transfer finishes.</strong> If either person closes the tab or loses connection, the transfer stops and is not resumed. If a device is only away for a while (choosing photos, another app in front), the other side waits and shows that it is away, and the transfer carries on when it returns. A phone may still drop the connection if the page stays in the background for long, especially on iPhone. While a transfer runs the page asks the screen to stay on (where the browser allows it), and it warns you before you close the tab or leave.</li>
       <li><strong>The ID is the only lock.</strong> Anyone who learns it before the right person joins can take the one free place. Share it over a channel you trust, and check that the person you meant to send to is the one connected.</li>
       <li><strong>The two-user rule and the 60-minute timer are enforced by the browsers,</strong> not by a server. They are not a security boundary against someone who modifies their own copy of the page.</li>
       <li><strong>Your IP is visible to the other person.</strong> That is how direct connections work. If that matters, this tool is not the right one.</li>
