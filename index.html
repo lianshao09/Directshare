@@ -251,12 +251,18 @@
   .pill.away { background: var(--track); color: var(--muted); }
   .closed-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-  /* ---- home: two-column on desktop, like closedroom.site ---- */
-  .home { display: flex; flex-direction: column; }
+  /* ---- home: same layout and split point as closedroom.site ---- */
+  .home { display: flex; flex-direction: column; min-height: 100dvh; }
   .home-left { display: contents; }
-  .home .intro { order: 1; }
-  .home .home-right { order: 2; }
-  .home .facts { order: 3; }
+  .home .intro { order: 1; padding: 28px 20px 4px; }
+  .home .home-right { order: 2; padding: 18px 20px 8px; }
+  .home .home-below { order: 3; }
+  .home-below { padding: 8px 20px 28px; }
+  .home-below .facts { margin: 0; padding: 0; }
+  .sister { margin: 22px 0 0; padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+  .sister p { margin: 0; flex: 1 1 220px; color: var(--muted); font-size: .9rem; line-height: 1.45; }
+  .sister p strong { display: block; color: var(--text); font-family: var(--serif); font-size: 1.05rem; font-weight: 600; }
+  .sister .btn { text-decoration: none; flex: none; }
   .home-form { display: flex; flex-direction: column; gap: 14px; }
   .hint { margin: 8px 0 0; color: var(--muted); font-size: .84rem; line-height: 1.4; }
   .tools { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -271,15 +277,13 @@
   .actions .btn { min-height: 52px; padding: 0 12px; }
   .home-form .field-error { margin: 0; }
   body.on-home .site-foot { display: none; }
-  @media (min-width: 900px) {
+  @media (min-width: 880px) {
     body.on-home { padding: 0; }
     body.on-home .shell { max-width: none; margin: 0; }
-    .home { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; min-height: 100dvh; }
-    .home-left { display: flex; flex-direction: column; justify-content: flex-end; padding: 56px max(32px, 5vw) 48px; }
-    .home .intro, .home .facts { order: initial; }
-    .home .intro { padding: 0; }
-    .home .facts { padding: 28px 0 0; max-width: 46ch; }
-    .home-right { display: flex; align-items: center; justify-content: center; padding: 48px 32px; background: #0e110e; border-left: 1px solid var(--border); }
+    .home { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); grid-template-rows: 1fr auto; }
+    .home .intro { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 64px 56px 12px; }
+    .home .home-below { grid-column: 1; grid-row: 2; align-self: start; padding: 12px 56px 64px; max-width: 46rem; }
+    .home .home-right { grid-column: 2; grid-row: 1 / span 2; display: flex; align-items: center; justify-content: center; background: var(--card); border-left: 1px solid var(--border); padding: 64px 48px; }
     .home-form.card { width: 100%; max-width: 420px; background: transparent; border: 0; padding: 0; }
   }
 </style>
@@ -312,11 +316,19 @@
           </a>
         </div>
       </section>
+      <div class="home-below">
       <ul class="facts">
         <li>Public relays only introduce the two browsers, and they never see the ID. Files never pass through them and are never stored.</li>
         <li>The connection is WebRTC, without TURN. On a very restrictive network the other person may not be able to connect.</li>
         <li>Nothing remains after you leave or close the tab. A channel also closes itself after 60 minutes.</li>
       </ul>
+      <div class="sister">
+        <p><strong>Closed room</strong>Private browser-to-browser chat from the same project. Same idea: no accounts, nothing stored.</p>
+        <a class="btn btn-ghost btn-sm" href="https://closedroom.site/" target="_blank" rel="noopener noreferrer">Open Closed room
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+      </div>
     </div>
 
     <div class="home-right">
